@@ -104,8 +104,14 @@ export const Keymap = Extension.create({
       new Plugin({
         key: new PluginKey('clearDocument'),
         appendTransaction: (transactions, oldState, newState) => {
+          const { empty, from, to } = oldState.selection
+
+          if (empty) {
+            return
+          }
+
           const docChanges = transactions.some(transaction => transaction.docChanged)
-            && !oldState.doc.eq(newState.doc)
+            && oldState.doc.nodeSize !== newState.doc.nodeSize
 
           const ignoreTr = transactions.some(transaction => transaction.getMeta('preventClearDocument'))
 
@@ -113,12 +119,11 @@ export const Keymap = Extension.create({
             return
           }
 
-          const { empty, from, to } = oldState.selection
           const allFrom = Selection.atStart(oldState.doc).from
           const allEnd = Selection.atEnd(oldState.doc).to
           const allWasSelected = from === allFrom && to === allEnd
 
-          if (empty || !allWasSelected) {
+          if (!allWasSelected) {
             return
           }
 

@@ -40,6 +40,7 @@ import { isFunction } from './utilities/isFunction.js'
 
 export * as extensions from './extensions/index.js'
 
+export interface EditorStorage extends Record<string, any> { }
 // @ts-ignore
 export interface TiptapEditorHTMLElement extends HTMLElement {
   editor?: Editor
@@ -128,7 +129,7 @@ export class Editor extends EventEmitter<EditorEvents> {
   /**
    * Returns the editor storage.
    */
-  public get storage(): Record<string, any> {
+  public get storage(): EditorStorage {
     return this.extensionStorage
   }
 
@@ -319,6 +320,14 @@ export class Editor extends EventEmitter<EditorEvents> {
    * Creates a ProseMirror view.
    */
   private createView(): void {
+    this.view = new EditorView(this.options.element, {
+      ...this.options.editorProps,
+      dispatchTransaction: this.dispatchTransaction.bind(this),
+      state: EditorState.create({
+        doc: this.schema.topNodeType.create(),
+      }),
+    })
+
     let doc: ProseMirrorNode
 
     try {
@@ -356,7 +365,8 @@ export class Editor extends EventEmitter<EditorEvents> {
         { errorOnInvalidContent: false },
       )
     }
-    const selection = resolveFocusPosition(doc, this.options.autofocus)
+
+    const selection = resolveFocusPosition(doc, this.options.autofocus) || undefined
 
     this.view = new EditorView(this.options.element, {
       ...this.options.editorProps,
@@ -377,13 +387,16 @@ export class Editor extends EventEmitter<EditorEvents> {
 
     // `editor.view` is not yet available at this time.
     // Therefore we will add all plugins and node views directly afterwards.
-    const newState = this.state.reconfigure({
+    const newState = EditorState.create({
       plugins: this.extensionManager.plugins,
+      doc,
+      selection,
     })
 
-    this.view.updateState(newState)
-
-    this.createNodeViews()
+    this.view.setProps({
+      state: newState,
+      nodeViews: this.extensionManager.nodeViews,
+    })
     this.prependClass()
 
     // Let’s store the editor instance in the DOM element.
