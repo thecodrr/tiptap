@@ -40,7 +40,7 @@
     "directory": "packages/extension-text-align"
   },
   "scripts": {
-    "clean": "rm -rf dist",
+    "clean": "rimraf dist",
     "build": "npm run clean && rollup -c"
   }
 }

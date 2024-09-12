@@ -57,7 +57,7 @@
     "directory": "packages/starter-kit"
   },
   "scripts": {
-    "clean": "rm -rf dist",
+    "clean": "rimraf dist",
     "build": "npm run clean && rollup -c"
   }
 }

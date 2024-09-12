@@ -44,7 +44,7 @@
     "directory": "packages/extension-bullet-list"
   },
   "scripts": {
-    "clean": "rm -rf dist",
+    "clean": "rimraf dist",
     "build": "npm run clean && rollup -c"
   }
 }
