@@ -14,6 +14,22 @@ declare module '@tiptap/core' {
   }
 }
 
-export const liftEmptyBlock: RawCommands['liftEmptyBlock'] = () => ({ state, dispatch }) => {
-  return originalLiftEmptyBlock(state, dispatch)
+export const liftEmptyBlock: RawCommands['liftEmptyBlock'] = () => ({ state, dispatch, editor }) => {
+  return originalLiftEmptyBlock(state, tr => {
+    if (!dispatch) {
+      return true
+    }
+
+    const { selection, storedMarks } = state
+    const marks = storedMarks || (selection.$to.parentOffset && selection.$from.marks())
+
+    if (!marks) { return dispatch(tr) }
+
+    const { splittableMarks } = editor.extensionManager
+    const filteredMarks = marks.filter(mark => splittableMarks.includes(mark.type.name))
+
+    tr.ensureMarks(filteredMarks)
+
+    return dispatch(tr)
+  })
 }

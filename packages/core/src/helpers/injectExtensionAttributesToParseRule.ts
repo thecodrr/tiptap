@@ -13,7 +13,7 @@ export function injectExtensionAttributesToParseRule(
   parseRule: ParseRule,
   extensionAttributes: ExtensionAttribute[],
 ): ParseRule {
-  if ('style' in parseRule) {
+  if ('style' in parseRule || (!parseRule.attrs && !parseRule.getAttrs && extensionAttributes.length === 0)) {
     return parseRule
   }
 
@@ -34,14 +34,12 @@ export function injectExtensionAttributesToParseRule(
         if (value === null || value === undefined) {
           return items
         }
+        // @ts-expect-error for perf reasons
+        items[item.name] = value
+        return items
+      }, oldAttributes || {})
 
-        return {
-          ...items,
-          [item.name]: value,
-        }
-      }, {})
-
-      return { ...oldAttributes, ...newAttributes }
+      return newAttributes
     },
   }
 }
