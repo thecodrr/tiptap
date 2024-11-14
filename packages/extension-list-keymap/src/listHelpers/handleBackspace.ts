@@ -16,7 +16,9 @@ export const handleBackspace = (editor: Editor, name: string, parentListTypes: s
   // the previous item is a list (orderedList or bulletList)
   // move the cursor into the list and delete the current item
   if (!isNodeActive(editor.state, name) && hasListBefore(editor.state, name, parentListTypes)) {
-    const { $anchor } = editor.state.selection
+    const { $anchor, empty } = editor.state.selection
+
+    if (!empty) { return false }
 
     const $listPos = editor.state.doc.resolve($anchor.before() - 1)
 
