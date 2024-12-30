@@ -322,6 +322,11 @@ export class Editor extends EventEmitter<EditorEvents> {
   private createView(): void {
     this.view = new EditorView(this.options.element, {
       ...this.options.editorProps,
+      attributes: {
+        // add `role="textbox"` to the editor element
+        role: 'textbox',
+        ...this.options.editorProps?.attributes,
+      },
       dispatchTransaction: this.dispatchTransaction.bind(this),
       state: EditorState.create({
         doc: this.schema.topNodeType.create(),
@@ -367,20 +372,6 @@ export class Editor extends EventEmitter<EditorEvents> {
     }
 
     const selection = resolveFocusPosition(doc, this.options.autofocus) || undefined
-
-    this.view = new EditorView(this.options.element, {
-      ...this.options.editorProps,
-      attributes: {
-        // add `role="textbox"` to the editor element
-        role: 'textbox',
-        ...this.options.editorProps?.attributes,
-      },
-      dispatchTransaction: this.dispatchTransaction.bind(this),
-      state: EditorState.create({
-        doc,
-        selection: selection || undefined,
-      }),
-    })
 
     // `editor.view` is not yet available at this time.
     // Therefore we will add all plugins and node views directly afterwards.
