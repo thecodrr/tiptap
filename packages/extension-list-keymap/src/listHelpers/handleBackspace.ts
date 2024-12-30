@@ -65,6 +65,12 @@ export const handleBackspace = (editor: Editor, name: string, parentListTypes: s
     return false
   }
 
+  // if the current position is not at the start of the list item 
+  // then join backward i.e. join within the list item
+  if (listItemPos.$pos.parentOffset !== 0) {
+      return editor.commands.joinBackward();
+  }
+
   const $prev = editor.state.doc.resolve(listItemPos.$pos.pos - 2)
   const prevNode = $prev.node(listItemPos.depth)
 
